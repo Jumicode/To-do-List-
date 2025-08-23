@@ -51,7 +51,7 @@ class TodoController extends Controller
      */
     public function show(Todo $todo)
     {
-        //
+        
     }
 
     /**
@@ -73,8 +73,10 @@ class TodoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Todo $todo)
+    public function destroy($id)
     {
-        //
+       $todos = Todo::where('user_id', Auth::id())->findOrFail($id);
+       $todos->delete();
+       return response()->json(['message' => 'Todo deleted successfully'], 200);
     }
 }
