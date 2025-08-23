@@ -14,4 +14,5 @@ Route::middleware('auth:api')->group(function () {
     Route::post('todos', [TodoController::class, 'store']);
     Route::get('todos', [TodoController::class,'index']);
     Route::delete('todos/{id}',[TodoController::class,'destroy']);
+    Route::put('todos/{id}', [TodoController::class,'update']);
 });

@@ -65,9 +65,19 @@ class TodoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Todo $todo)
+    public function update(Request $request, $id)
     {
-        //
+        $todos = Todo::where('user_id', Auth::id())->findOrFail($id);
+        
+        $request->validate([
+       'title' => 'required|string',
+       'description' => 'nullable|string',
+       'completed' => 'boolean' 
+        ]);
+
+     $todos->update($request->all());
+     return response()->json($todos);    
+
     }
 
     /**
