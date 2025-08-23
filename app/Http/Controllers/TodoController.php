@@ -19,14 +19,6 @@ class TodoController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -49,17 +41,24 @@ class TodoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Todo $todo)
+    public function show($id)
     {
         
-    }
+        $todos = Todo::where('user_id', Auth::id())->findOrFail($id);
+        
+        if (!$todos) {
+            $data = [
+                'message' => 'Todo not found',
+                'status' => 404
+        ];
+            return response()->json($data, 404);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Todo $todo)
-    {
-        //
+        $data = [
+            'todos' => $todos,
+            'status' => 200
+        ];
+        return response()->json($data, 200); 
     }
 
     /**

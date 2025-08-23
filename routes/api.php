@@ -13,6 +13,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('todos', [TodoController::class, 'store']);
     Route::get('todos', [TodoController::class,'index']);
+    Route::get('todos/{id}', [TodoController::class,'show']);
     Route::delete('todos/{id}',[TodoController::class,'destroy']);
     Route::put('todos/{id}', [TodoController::class,'update']);
 });
