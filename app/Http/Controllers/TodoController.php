@@ -6,7 +6,6 @@ use App\Models\Todo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-
 class TodoController extends Controller
 {
     /**
@@ -14,6 +13,10 @@ class TodoController extends Controller
      */
     public function index(Request $request)
     {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $todos = Todo::where('user_id', Auth::id())->get();
         return response()->json($todos, 200);
     }
@@ -23,10 +26,14 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
-       'title' => 'required|string',
-       'description' => 'nullable|string',
-       'completed' => 'boolean' 
+            'title' => 'required|string',
+            'description' => 'nullable|string',
+            'completed' => 'boolean'
         ]);
 
         $todo = Todo::create([
@@ -43,22 +50,21 @@ class TodoController extends Controller
      */
     public function show($id)
     {
-        
-        $todos = Todo::where('user_id', Auth::id())->findOrFail($id);
-        
-        if (!$todos) {
-            $data = [
-                'message' => 'Todo not found',
-                'status' => 404
-        ];
-            return response()->json($data, 404);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $todo = Todo::where('user_id', Auth::id())->find($id);
+
+        if (!$todo) {
+            return response()->json(['message' => 'Unauthorized or not found', 'status' => 403], 403);
         }
 
         $data = [
-            'todos' => $todos,
+            'todos' => $todo,
             'status' => 200
         ];
-        return response()->json($data, 200); 
+        return response()->json($data, 200);
     }
 
     /**
@@ -66,17 +72,24 @@ class TodoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $todos = Todo::where('user_id', Auth::id())->findOrFail($id);
-        
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $todo = Todo::where('user_id', Auth::id())->find($id);
+
+        if (!$todo) {
+            return response()->json(['message' => 'Unauthorized or not found', 'status' => 403], 403);
+        }
+
         $request->validate([
-       'title' => 'required|string',
-       'description' => 'nullable|string',
-       'completed' => 'boolean' 
+            'title' => 'required|string',
+            'description' => 'nullable|string',
+            'completed' => 'boolean'
         ]);
 
-     $todos->update($request->all());
-     return response()->json($todos);    
-
+        $todo->update($request->all());
+        return response()->json($todo);
     }
 
     /**
@@ -84,8 +97,17 @@ class TodoController extends Controller
      */
     public function destroy($id)
     {
-       $todos = Todo::where('user_id', Auth::id())->findOrFail($id);
-       $todos->delete();
-       return response()->json(['message' => 'Todo deleted successfully'], 200);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $todo = Todo::where('user_id', Auth::id())->find($id);
+
+        if (!$todo) {
+            return response()->json(['message' => 'Unauthorized or not found', 'status' => 403], 403);
+        }
+
+        $todo->delete();
+        return response()->json(['message' => 'Todo deleted successfully'], 200);
     }
 }
