@@ -12,17 +12,10 @@ class TodoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $todos = Todo::where('user_id', Auth::id())->get();
+        return response()->json($todos, 200);
     }
 
     /**
@@ -48,32 +41,51 @@ class TodoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Todo $todo)
+    public function show($id)
     {
-        //
-    }
+        
+        $todos = Todo::where('user_id', Auth::id())->findOrFail($id);
+        
+        if (!$todos) {
+            $data = [
+                'message' => 'Todo not found',
+                'status' => 404
+        ];
+            return response()->json($data, 404);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Todo $todo)
-    {
-        //
+        $data = [
+            'todos' => $todos,
+            'status' => 200
+        ];
+        return response()->json($data, 200); 
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Todo $todo)
+    public function update(Request $request, $id)
     {
-        //
+        $todos = Todo::where('user_id', Auth::id())->findOrFail($id);
+        
+        $request->validate([
+       'title' => 'required|string',
+       'description' => 'nullable|string',
+       'completed' => 'boolean' 
+        ]);
+
+     $todos->update($request->all());
+     return response()->json($todos);    
+
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Todo $todo)
+    public function destroy($id)
     {
-        //
+       $todos = Todo::where('user_id', Auth::id())->findOrFail($id);
+       $todos->delete();
+       return response()->json(['message' => 'Todo deleted successfully'], 200);
     }
 }
