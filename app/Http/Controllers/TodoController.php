@@ -110,4 +110,31 @@ class TodoController extends Controller
         $todo->delete();
         return response()->json(['message' => 'Todo deleted successfully'], 200);
     }
+
+    /**
+     * Display a paginated listing of the resource.
+     */
+    public function paginatedIndex(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $page = (int) $request->query('page', 1);
+        $limit = (int) $request->query('limit', 10);
+
+        $query = Todo::where('user_id', Auth::id());
+        $total = $query->count();
+
+        $todos = $query->skip(($page - 1) * $limit)
+                       ->take($limit)
+                       ->get(['id', 'title', 'description','completed']);
+
+        return response()->json([
+            'data' => $todos,
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total
+        ]);
+    }
 }
