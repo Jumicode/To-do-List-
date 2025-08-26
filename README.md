@@ -2,6 +2,8 @@
 
 This project is a simple To-Do List RESTful API built with Laravel, Docker, and MySQL. It allows users to register, log in, and manage their personal to-do tasks with authentication and pagination support.
 
+https://roadmap.sh/projects/todo-list-api
+
 ## Features
 
 - User registration and authentication (JWT or Passport)
