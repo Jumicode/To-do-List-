@@ -1,20 +1,24 @@
 # Usa la imagen de PHP-FPM como base
 FROM php:8.2-fpm-alpine
 
-# Instalar dependencias del sistema y extensiones de PHP
+# Instala el entorno de ejecución de Nginx y las dependencias de PHP
 RUN apk add --no-cache \
     nginx \
-    git \
-    curl \
     libxml2-dev \
     libpng-dev \
     libzip-dev \
     oniguruma-dev \
     libjpeg-turbo-dev \
-    jpeg-dev \
+    jpeg-dev
+
+# Instala otras herramientas del sistema
+RUN apk add --no-cache \
+    git \
+    curl \
     bash \
     build-base
 
+# Configura e instala las extensiones de PHP
 RUN docker-php-ext-configure gd --with-jpeg \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
@@ -26,8 +30,10 @@ COPY . .
 # Instalar dependencias de Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Copiar la configuración de Nginx y el script de inicio
+# Copiar la configuración de Nginx
 COPY docker/nginx/nginx.conf /etc/nginx/http.d/default.conf
+
+# Copiar el script de inicio y darle permisos de ejecución
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
