@@ -7,11 +7,7 @@ if [ ! -f /var/www/html/.env ]; then
   cp /var/www/html/.env.example /var/www/html/.env
 fi
 
-# Genera la clave de la aplicación si no existe
-if [ -z "$APP_KEY" ]; then
-    echo "APP_KEY no está configurada. Generando una nueva..."
-    php /var/www/html/artisan key:generate
-fi
+
 
 # Vincula el directorio de storage de Laravel
 php /var/www/html/artisan storage:link
