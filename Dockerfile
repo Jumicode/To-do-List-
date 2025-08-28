@@ -1,47 +1,43 @@
-# Usa la imagen de PHP-FPM como base
+# Use a PHP-FPM image as your base
 FROM php:8.2-fpm-alpine
 
-# Instala el entorno de ejecución de Nginx y las dependencias de PHP
+# Install system dependencies and PHP extensions
+# We add Caddy here instead of Nginx
 RUN apk add --no-cache \
-    nginx \
+    caddy \
     libxml2-dev \
     libpng-dev \
     libzip-dev \
     oniguruma-dev \
     libjpeg-turbo-dev \
-    jpeg-dev
-
-# Instala otras herramientas del sistema
-RUN apk add --no-cache \
+    jpeg-dev \
     git \
     curl \
     bash \
     build-base
 
-# Configura e instala las extensiones de PHP
+# Configure and install PHP extensions
 RUN docker-php-ext-configure gd --with-jpeg \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Copiar el proyecto al contenedor
+# Copy the project into the container
 WORKDIR /var/www/html
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . .
 
-# Instalar dependencias de Laravel
-RUN composer install --optimize-autoloader
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install --no-dev --optimize-autoloader
 
-# Copiar la configuración de Nginx
-COPY docker/nginx/nginx.conf /etc/nginx/http.d/default.conf
+# Set file ownership for the web server user
+RUN chown -R www-data:www-data /var/www/html
 
-# Copiar el script de inicio y darle permisos de ejecución
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Copy the Caddyfile to the correct location
+COPY Caddyfile /etc/caddy/Caddyfile
 
-# Exponer el puerto
+# Expose the port
 EXPOSE 80
 
-# Usar el script como punto de entrada
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
-# Comando para iniciar Nginx y PHP-FPM
-CMD ["/bin/bash", "-c", "nginx -g 'daemon off;' & php-fpm"]
+# This command will start Caddy and PHP-FPM together
+# 'caddy run' will keep Caddy running in the foreground
+# 'php-fpm' is needed to run the PHP-FPM service
+CMD ["/bin/bash", "-c", "caddy run --config /etc/caddy/Caddyfile & php-fpm"]
