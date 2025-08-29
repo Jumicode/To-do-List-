@@ -1,10 +1,11 @@
-:80
+# Escucha en el puerto proporcionado por la variable de entorno PORT.
+:{$PORT}
 
+# Establece la raíz de la aplicación.
 root * /var/www/html/public
 
-# Caddy handles static files and redirects to index.php for your Laravel routes
+# Mueve la petición al index.php si no se encuentra el archivo estático.
 try_files {path} {path}/ /index.php
 
-# PHP-FPM configuration
-# The 'php_fastcgi' directive automatically handles the communication with PHP-FPM
+# Pasa las peticiones PHP a PHP-FPM, que está en el mismo contenedor.
 php_fastcgi 127.0.0.1:9000
