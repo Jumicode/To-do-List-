@@ -1,8 +1,7 @@
-# Use a PHP-FPM image as your base
+# Usa la imagen base de PHP-FPM.
 FROM php:8.2-fpm-alpine
 
-# Install system dependencies and PHP extensions
-# We add Caddy here instead of Nginx
+# Instala Caddy y las dependencias de PHP.
 RUN apk add --no-cache \
     caddy \
     libxml2-dev \
@@ -16,28 +15,27 @@ RUN apk add --no-cache \
     bash \
     build-base
 
-# Configure and install PHP extensions
+# Configura e instala las extensiones de PHP.
 RUN docker-php-ext-configure gd --with-jpeg \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Copy the project into the container
+# Copia el proyecto al contenedor.
 WORKDIR /var/www/html
 COPY . .
 
-# Install Composer
+# Copia el binario de Composer y las dependencias de Laravel.
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --optimize-autoloader
 
-# Set file ownership for the web server user
+# Asigna los permisos correctos.
 RUN chown -R www-data:www-data /var/www/html
 
-# Copy the Caddyfile to the correct location
+# Copia el Caddyfile al contenedor.
 COPY Caddyfile /etc/caddy/Caddyfile
 
-# Expose the port
+# Expone el puerto 80, aunque Caddy usará la variable de entorno PORT.
 EXPOSE 80
 
-# This command will start Caddy and PHP-FPM together
-# 'caddy run' will keep Caddy running in the foreground
-# 'php-fpm' is needed to run the PHP-FPM service
+# Comando para iniciar Caddy y PHP-FPM.
+# Caddy se ejecuta en segundo plano (run) mientras que php-fpm lo hace en primer plano.
 CMD ["/bin/bash", "-c", "caddy run --config /etc/caddy/Caddyfile & php-fpm"]
