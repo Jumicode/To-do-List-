@@ -13,11 +13,14 @@ RUN apk add --no-cache \
     git \
     curl \
     bash \
-    build-base
+    build-base \
+    # Instala la librería cliente de PostgreSQL
+    libpq-dev
 
 # Configura e instala las extensiones de PHP.
+
 RUN docker-php-ext-configure gd --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+    && docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd zip
 
 # Copia el proyecto al contenedor.
 WORKDIR /var/www/html
@@ -37,5 +40,4 @@ COPY Caddyfile /etc/caddy/Caddyfile
 EXPOSE 80
 
 # Comando para iniciar Caddy y PHP-FPM.
-# Caddy se ejecuta en segundo plano (run) mientras que php-fpm lo hace en primer plano.
 CMD ["/bin/bash", "-c", "caddy run --config /etc/caddy/Caddyfile & php-fpm"]
