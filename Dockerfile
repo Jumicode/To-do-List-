@@ -18,7 +18,6 @@ RUN apk add --no-cache \
     libpq-dev
 
 # Configura e instala las extensiones de PHP.
-
 RUN docker-php-ext-configure gd --with-jpeg \
     && docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd zip
 
@@ -29,6 +28,9 @@ COPY . .
 # Copia el binario de Composer y las dependencias de Laravel.
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --optimize-autoloader
+
+# Ejecuta las migraciones de la base de datos
+RUN php artisan migrate --force
 
 # Asigna los permisos correctos.
 RUN chown -R www-data:www-data /var/www/html
