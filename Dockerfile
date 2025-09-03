@@ -14,7 +14,7 @@ RUN apk add --no-cache \
     curl \
     bash \
     build-base \
-    # Instala la librería cliente de PostgreSQL
+    
     libpq-dev
 
 # Configura e instala las extensiones de PHP.
